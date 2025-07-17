@@ -32,7 +32,7 @@ export const syncUserUpdation = inngest.createFunction(
     {
         id:'update-user-from-clerk'
     },
-    { event:'clerk/user.update'},
+    { event:'clerk/user.updated'},
     async ({event}) => {
         const {id,first_name,last_name , email_addresses,image_url} = event.data
               const userData = {
@@ -54,10 +54,14 @@ export const syncUserDeletion = inngest.createFunction(
      },
      {event:'clerk/user.deleted'},
      async ({event}) => {
-        const id = event.data
+        const {id} = event.data
         
-        await dbConnect();
-        await User.findByIdAndDelete(id);
+        const userId = id?.id; // Access the 'id' property from the object
+    if (!userId) {
+      throw new Error("No valid user ID provided in event data");
+    }
+    await dbConnect();
+    await User.findByIdAndDelete(userId);
      }
 
 )
